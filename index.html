@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mental Health - 스트레스 자가진단</title>
+    <link href="https://fonts.googleapis.com/css2?family=Nanum+Gothic:wght@400;700;800&display=swap" rel="stylesheet">
+    <style>
+        /* 🎨 둥글고 화사한 스카이 블루 컬러 셋 반영 */
+        :root {
+            --bg-color: #edf7fd;         /* 파스텔 스카이 블루 전체 배경 */
+            --card-color: #ffffff;       /* 순백색 질문 카드 */
+            --text-main: #1e293b;        /* 부드러운 다크 네이비 본문 */
+            --text-muted: #64748b;       /* 차분한 블루 그레이 설명문 */
+            --accent-color: #38bdf8;     /* 맑은 하늘색 메인 버튼 */
+            --hover-color: #0ea5e9;      /* 짙은 하늘색 마우스 호버 */
+            --back-btn-color: #e2e8f0;   /* 연한 회색 이전 버튼 */
+            --back-hover-color: #cbd5e0; /* 이전 버튼 호버 */
+            --border-color: #bae6fd;     /* 은은한 하늘색빛 카드 테두리 */
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Nanum Gothic', 'Malgun Gothic', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            color: var(--text-main);
+            padding: 20px;
+        }
+
+        /* 윈도우 창 크기 규격 구현 (550px x 660px 상당) */
+        .app-container {
+            width: 100%;
+            max-width: 500px;
+            background-color: transparent;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* 1. 상단 진행률 영역 */
+        .progress-container {
+            width: 100%;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .progress-label {
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--text-muted);
+            margin-bottom: 8px;
+        }
+
+        .progress-bar-bg {
+            width: 100%;
+            height: 6px;
+            background-color: #e2e8f0;
+            border-radius: 3px;
+            overflow: hidden;
+        }
+
+        .progress-bar-fill {
+            width: 0%;
+            height: 100%;
+            background-color: var(--accent-color);
+            transition: width 0.3s ease;
+        }
+
+        /* 2. 중앙 질문 카드 영역 */
+        .question-card {
+            width: 100%;
+            min-height: 180px;
+            background-color: var(--card-color);
+            border: 2px solid var(--border-color);
+            border-radius: 12px;
+            padding: 30px 25px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+            margin-bottom: 25px;
+        }
+
+        .question-text {
+            font-size: 18px;
+            font-weight: 700;
+            line-height: 1.6;
+            word-break: keep-all;
+        }
+
+        /* 3. 하단 버튼 영역 */
+        .button-container {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .option-btn {
+            width: 100%;
+            padding: 12px;
+            font-size: 16px;
+            font-weight: 700;
+            color: #ffffff;
+            background-color: var(--accent-color);
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+            outline: none;
+        }
+
+        .option-btn:hover {
+            background-color: var(--hover-color);
+        }
+
+        .back-btn {
+            width: 100%;
+            padding: 10px;
+            font-size: 14px;
+            font-weight: 700;
+            color: #475569;
+            background-color: var(--back-btn-color);
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+            margin-top: 5px;
+            outline: none;
+            display: none; /* 첫 문항에서는 숨김 */
+        }
+
+        .back-btn:hover {
+            background-color: var(--back-hover-color);
+        }
+
+        /* 4. 결과 화면 전용 스타일 */
+        .result-title {
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--text-muted);
+            margin-bottom: 10px;
+        }
+
+        .result-card {
+            width: 100%;
+            background-color: var(--card-color);
+            border: 2px solid var(--border-color);
+            border-radius: 12px;
+            padding: 35px 25px;
+            text-align: center;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+        }
+
+        .result-score {
+            font-size: 48px;
+            font-weight: 800;
+            color: var(--text-main);
+            margin-bottom: 10px;
+        }
+
+        .result-status {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 15px;
+        }
+
+        .result-desc {
+            font-size: 14px;
+            color: var(--text-muted);
+            line-height: 1.6;
+            word-break: keep-all;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="app-container" id="app">
+        <div class="progress-container" id="progress-area">
+            <div class="progress-label" id="progress-label">질문 1 / 30</div>
+            <div class="progress-bar-bg">
+                <div class="progress-bar-fill" id="progress-bar"></div>
+            </div>
+        </div>
+
+        <div class="question-card" id="card-area">
+            <div class="question-text" id="question-text">질문을 불러오는 중입니다...</div>
+        </div>
+
+        <div class="button-container" id="button-area">
+            </div>
+        <button class="back-btn" id="back-btn" onclick="goBack()">← 이전 문항으로</button>
+    </div>
+
+    <script>
+        // 질문 데이터
+        const questions = [
+            "1. 가족들이나 친구들간에 다툼이 있었다.",
+            "2. 힘들어도 말할 친구가 없다.",
+            "3. 나의 사고방식 및 가치관으론 다른 친구들을 이해하기 힘들다.",
+            "4. 과중한 숙제와 시험을 위해 공부하는 것이 지겹다.",
+            "5. 부모의 지나친 간섭으로 부모와의 갈등이 있다.",
+            "6. 일정시간동안 정신을 집중하는데 어려움이 있다.",
+            "7. 아주 사소한 결정도 잘 내리지 못한다.",
+            "8. 인터넷 사용 때문에 성적이나 학교생활에 문제가 생긴 적이 있다.",
+            "9. 식욕은 없지만 건강을 위해 음식을 먹는다.",
+            "10. 인내가 어떤 것을 하도록 요구받았을 때 필요한 정보를 상기하는데 어려움이 있다.",
+            "11. 특정한 문제에 주의를 집중하는 능력이 결여된 것 같다.",
+            "12. 내 생활이 내 의지대로 조절되지 않는 느낌이 든다.",
+            "13. 해야 할 일들이 계속 머릿속에 남아 부담으로 느껴진다.",
+            "14. 가족이나 친한 사람과 함께 있는 시간도 편안하지 않았다.",
+            "15. 개인적인 문제를 처리할 수 없을 것 같다고 느낀 적이 있다.",
+            "16. 해야 할 일이 너무 많아 감당이 안 된다고 느낀 적이 있다.",
+            "17. 스트레스로 인해 잠들기 어렵거나 수면의 질이 떨어진 적이 있다.",
+            "18. 신경이 예민해져 작은 자극에도 과민하게 반응한 적이 있다.",
+            "19. 일상에서 종종 자기 자신이 아무 쓸모 없다고 느껴진다.",
+            "20. 잠들기 직전에 생각이 많아져 머리가 시끄럽다.",
+            "21. 학업을 하는 데 있어서 관심이나 즐거움을 거의 느낄 수 없다.",
+            "22. 하루를 시작하기 전에 이미 에너지가 다 빠진 느낌이다.",
+            "23. 학교 생활을 하면서 매일 조퇴를 하고 싶다고 생각한다.",
+            "24. 누가 부탁하면 거절하기보다 속으로 참는 편이다.",
+            "25. 하루 중 멍하게 있는 시간이 눈에 띄게 늘었다.",
+            "26. 예전엔 금방 끝낼 일을 계속 미루게 된다.",
+            "27. 예전의 나는 더 생기 있었던 것 같다는 생각이 든다.",
+            "28. 웃고 있어도 속은 전혀 안 웃고 있다.",
+            "29. 가끔은 그냥 어디론가 사라지고 싶다는 생각이 든다.",
+            "30. 최근 지나치게 체중이 늘거나 혹은 지나치게 체중이 빠졌다."
+        ];
+
+        // 점수 매핑
+        const scores = {
+            "전혀 아니다": 1,
+            "가끔 그렇다": 2,
+            "보통이다": 3,
+            "자주 그렇다": 4,
+            "항상 그렇다": 5
+        };
+
+        let currentQuestion = 0;
+        let totalScore = 0;
+        let scoreHistory = [];
+
+        // DOM 요소 정의
+        const progressLabel = document.getElementById("progress-label");
+        const progressBar = document.getElementById("progress-bar");
+        const questionText = document.getElementById("question-text");
+        const buttonArea = document.getElementById("button-area");
+        const backBtn = document.getElementById("back-btn");
+        const appContainer = document.getElementById("app");
+
+        // 초기 실행: 선택지 버튼 만들기 및 질문 업데이트
+        function init() {
+            createOptionButtons();
+            updateProgress();
+        }
+
+        // 5가지 선택지 버튼 자동 생성
+        function createOptionButtons() {
+            buttonArea.innerHTML = "";
+            Object.keys(scores).forEach(key => {
+                const btn = document.createElement("button");
+                btn.className = "option-btn";
+                btn.innerText = key;
+                btn.onclick = () => selectAnswer(key);
+                buttonArea.appendChild(btn);
+            });
+        }
+
+        // 상태 업데이트 (진행바 및 이전버튼 토글)
+        function updateProgress() {
+            const progressVal = (currentQuestion / questions.length) * 100;
+            progressBar.style.width = `${progressVal}%`;
+            progressLabel.innerText = `질문 ${currentQuestion + 1} / ${questions.length}`;
+            questionText.innerText = questions[currentQuestion];
+
+            // 첫 번째 질문이 아니면 '이전 문항' 버튼 표시
+            if (currentQuestion === 0) {
+                backBtn.style.display = "none";
+            } else {
+                backBtn.style.display = "block";
+            }
+        }
+
+        // 선택지 클릭 이벤트 처리
+        function selectAnswer(answerText) {
+            const score = scores[answerText];
+            scoreHistory.push(score);
+            totalScore += score;
+            currentQuestion++;
+
+            if (currentQuestion < questions.length) {
+                updateProgress();
+            } else {
+                showResult();
+            }
+        }
+
+        // 이전 질문으로 이동
+        function goBack() {
+            if (currentQuestion > 0) {
+                currentQuestion--;
+                const lastScore = scoreHistory.pop();
+                totalScore -= lastScore;
+                updateProgress();
+            }
+        }
+
+        // 결과 화면 출력
+        function showResult() {
+            let result = "";
+            let color = "";
+            let desc = "";
+
+            if (totalScore <= 45) {
+                result = "안정";
+                color = "#0bc5ea"; // 청량한 민트 블루
+                desc = "마음이 아주 투명하고 맑은 상태입니다. 지금처럼 기분 좋은 하루를 이어가세요!";
+            } else if (totalScore <= 85) {
+                result = "보통";
+                color = "#38bdf8"; // 하늘색
+                desc = "잔잔한 바람 같은 일상적인 스트레스입니다. 따뜻한 음료 한 잔으로 힐링해보세요.";
+            } else if (totalScore <= 125) {
+                result = "높음";
+                color = "#f43f5e"; // 로즈 핑크
+                desc = "마음에 비구름이 몰려오고 있어요. 잠시 하던 일을 내려놓고 나만의 시간을 가져보세요.";
+            } else {
+                result = "매우 높음";
+                color = "#be123c"; // 딥 로즈
+                desc = "마음의 에너지가 많이 소모되었습니다. 소중한 사람들과 대화를 나누거나 푹 쉬어주어야 해요.";
+            }
+
+            // 웹 구조에 맞춰 깔끔하게 결과 화면 렌더링
+            appContainer.innerHTML = `
+                <div class="result-title">스트레스 자가진단 완료</div>
+                <div class="result-card">
+                    <div class="result-score">${totalScore}점</div>
+                    <div class="result-status" style="color: ${color};">${result}</div>
+                    <div class="result-desc">${desc}</div>
+                </div>
+            `;
+        }
+
+        // 초기화 함수 실행
+        init();
+    </script>
+</body>
+</html>
